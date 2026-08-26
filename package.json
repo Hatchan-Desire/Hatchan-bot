@@ -1,0 +1,19 @@
+{
+  "name": "hatchan-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "特定の文字列を含むメッセージに反応して返信するDiscordボット（冷笑警察bot）",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "deploy-commands": "node src/deploy-commands.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.15.3",
+    "dotenv": "^16.4.5"
+  }
+}
