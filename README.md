@@ -1,0 +1,2 @@
+# Hatchan-bot
+Discord用
