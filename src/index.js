@@ -171,7 +171,7 @@ async function handleDelay(interaction) {
     persist();
     await interaction.reply({ content: '🛑 このチャンネルの遅延通知を停止しました。', flags: MessageFlags.Ephemeral });
   } else if (sub === 'status') {
-    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    await interaction.deferReply();
     const results = await delayWatcher.checkOnce({ notify: false });
     const lines = results.map((r) => {
       if (!r.ok) {
