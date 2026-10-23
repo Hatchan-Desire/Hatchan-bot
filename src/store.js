@@ -28,6 +28,10 @@ function defaultStore() {
     activeChannels: [],
     // 反応する文字列 -> 返信内容 のマッピング
     triggers: { ...DEFAULT_TRIGGERS },
+    // 遅延情報通知を有効化しているチャンネルID一覧
+    delayNotifyChannels: [],
+    // 路線キーごとの直近のステータス（再起動後も重複通知しないためのキャッシュ）
+    delayLastStatus: {},
   };
 }
 
@@ -53,6 +57,11 @@ function load() {
       triggers:
         parsed.triggers && typeof parsed.triggers === 'object' && !Array.isArray(parsed.triggers)
           ? parsed.triggers
+          : {},
+      delayNotifyChannels: Array.isArray(parsed.delayNotifyChannels) ? parsed.delayNotifyChannels : [],
+      delayLastStatus:
+        parsed.delayLastStatus && typeof parsed.delayLastStatus === 'object' && !Array.isArray(parsed.delayLastStatus)
+          ? parsed.delayLastStatus
           : {},
     };
   } catch (err) {

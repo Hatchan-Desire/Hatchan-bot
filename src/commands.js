@@ -38,6 +38,20 @@ const commands = [
         )
     )
     .addSubcommand((sub) => sub.setName('list').setDescription('登録済みの反応文字列一覧を表示します')),
+
+  new SlashCommandBuilder()
+    .setName('delay')
+    .setDescription('名鉄名古屋本線・JR東海道本線の遅延情報通知を管理します')
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
+    .addSubcommand((sub) =>
+      sub.setName('start').setDescription('このチャンネルへの遅延情報通知を開始します')
+    )
+    .addSubcommand((sub) =>
+      sub.setName('stop').setDescription('このチャンネルへの遅延情報通知を停止します')
+    )
+    .addSubcommand((sub) =>
+      sub.setName('status').setDescription('現在の運行状況を今すぐ確認します')
+    ),
 ];
 
 module.exports = { commands };
