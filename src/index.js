@@ -1,6 +1,7 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits, Events, MessageFlags } = require('discord.js');
 const store = require('./store');
+const { createDelayWatcher, DEFAULT_INTERVAL_MS } = require('./delayWatcher');
 
 const token = process.env.DISCORD_TOKEN;
 if (!token) {
@@ -23,8 +24,14 @@ const client = new Client({
   ],
 });
 
+const delayIntervalMs = process.env.DELAY_CHECK_INTERVAL_MS
+  ? Number(process.env.DELAY_CHECK_INTERVAL_MS)
+  : DEFAULT_INTERVAL_MS;
+const delayWatcher = createDelayWatcher({ client, state, persist, intervalMs: delayIntervalMs });
+
 client.once(Events.ClientReady, (c) => {
   console.log(`[bot] ログインしました: ${c.user.tag}`);
+  delayWatcher.start();
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
@@ -37,6 +44,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
       await handleStop(interaction);
     } else if (interaction.commandName === 'trigger') {
       await handleTrigger(interaction);
+    } else if (interaction.commandName === 'delay') {
+      await handleDelay(interaction);
     }
   } catch (err) {
     console.error('[bot] インタラクション処理中にエラーが発生しました:', err);
@@ -128,6 +137,50 @@ async function handleTrigger(interaction) {
       content: `登録済みの反応文字列（${words.length}件）:\n${lines.join('\n')}`,
       flags: MessageFlags.Ephemeral,
     });
+  }
+}
+
+async function handleDelay(interaction) {
+  const sub = interaction.options.getSubcommand();
+
+  if (sub === 'start') {
+    const channelId = interaction.channelId;
+    if (state.delayNotifyChannels.includes(channelId)) {
+      await interaction.reply({
+        content: 'ℹ️ このチャンネルはすでに遅延通知が有効です。',
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
+    state.delayNotifyChannels.push(channelId);
+    persist();
+    await interaction.reply({
+      content: '✅ このチャンネルで名鉄名古屋本線・JR東海道本線（豊橋～米原）の遅延通知を開始しました。',
+      flags: MessageFlags.Ephemeral,
+    });
+  } else if (sub === 'stop') {
+    const channelId = interaction.channelId;
+    if (!state.delayNotifyChannels.includes(channelId)) {
+      await interaction.reply({
+        content: 'ℹ️ このチャンネルでは遅延通知は有効になっていません。',
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
+    state.delayNotifyChannels = state.delayNotifyChannels.filter((id) => id !== channelId);
+    persist();
+    await interaction.reply({ content: '🛑 このチャンネルの遅延通知を停止しました。', flags: MessageFlags.Ephemeral });
+  } else if (sub === 'status') {
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    const results = await delayWatcher.checkOnce({ notify: false });
+    const lines = results.map((r) => {
+      if (!r.ok) {
+        return `- ⚠️ **${r.label}**: 取得・解析に失敗しました（${r.error || 'ページ構造が想定と異なる可能性があります'}）`;
+      }
+      const emoji = r.isNormal ? '🟢' : '🔴';
+      return `- ${emoji} **${r.label}**: ${r.detail || r.statusLabel}`;
+    });
+    await interaction.editReply({ content: lines.join('\n') });
   }
 }
 

@@ -10,7 +10,8 @@
   },
   "scripts": {
     "start": "node src/index.js",
-    "deploy-commands": "node src/deploy-commands.js"
+    "deploy-commands": "node src/deploy-commands.js",
+    "check-delay": "node src/check-delay.js"
   },
   "dependencies": {
     "discord.js": "^14.15.3",
