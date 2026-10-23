@@ -64,7 +64,7 @@ npm run deploy-commands
 npm start
 ```
 
-## サーバー側の更新手順（今後コードが更新されたとき）
+## サーバー側の更新手順
 
 `main` ブランチに新しい変更がマージされた後、稼働中のサーバーに反映する手順です。
 
@@ -75,7 +75,7 @@ npm start
    git checkout main
    git pull origin main
    ```
-3. 依存関係に変更がある場合に備えて再インストールする
+3. 依存関係に変更がある場合に備えて再インストール
    ```
    npm install
    ```
